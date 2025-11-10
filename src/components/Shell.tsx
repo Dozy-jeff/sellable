@@ -1,5 +1,11 @@
+'use client';
+
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ReactNode } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { logOut } from '@/lib/auth';
+import { Button } from '@/components/ui/button';
 
 interface ShellProps {
   children: ReactNode;
@@ -7,6 +13,17 @@ interface ShellProps {
 
 export default function Shell({ children }: ShellProps) {
   const currentYear = new Date().getFullYear();
+  const { user, userProfile, loading } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await logOut();
+      router.push('/');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -27,12 +44,41 @@ export default function Shell({ children }: ShellProps) {
               <Link href="/about" className="text-sm hover:text-primary">
                 About
               </Link>
-              <Link 
-                href="/seller" 
-                className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm hover:bg-primary/90"
-              >
-                Get Started
-              </Link>
+              {!loading && (
+                <>
+                  {user ? (
+                    <>
+                      <Link href="/seller/dashboard" className="text-sm hover:text-primary">
+                        Dashboard
+                      </Link>
+                      <div className="flex items-center space-x-3">
+                        <span className="text-sm text-muted-foreground">
+                          {userProfile?.displayName || user.email}
+                        </span>
+                        <Button
+                          onClick={handleLogout}
+                          variant="outline"
+                          size="sm"
+                        >
+                          Logout
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <Link href="/login" className="text-sm hover:text-primary">
+                        Login
+                      </Link>
+                      <Link
+                        href="/signup"
+                        className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm hover:bg-primary/90"
+                      >
+                        Get Started
+                      </Link>
+                    </>
+                  )}
+                </>
+              )}
             </nav>
           </div>
         </div>

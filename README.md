@@ -18,6 +18,9 @@ An AI-powered platform that helps business owners prepare, optimize, and sell th
 - **UI Components**: shadcn/ui
 - **Icons**: Lucide React
 - **Forms**: React Hook Form + Zod validation
+- **Authentication**: Firebase Authentication
+- **Database**: Cloud Firestore
+- **Backend**: Firebase
 
 ## Getting Started
 
@@ -54,19 +57,76 @@ pnpm dev
 
 4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+## Firebase Setup
+
+This project uses Firebase for authentication and data storage. The Firebase configuration is already included in `src/lib/firebase.ts`.
+
+### Firebase Services Used
+
+- **Firebase Authentication**: User login/signup with email and password
+- **Cloud Firestore**: NoSQL database for storing user profiles, seller intake data, readiness results, and completed tasks
+
+### Firestore Data Structure
+
+The app stores data in the following structure:
+
+```
+users (collection)
+└── {userId} (document)
+    ├── uid: string
+    ├── email: string
+    ├── displayName: string
+    ├── role: "seller" | "buyer"
+    ├── createdAt: Timestamp
+    ├── updatedAt: Timestamp
+    ├── sellerIntake: SellerIntake (optional)
+    ├── readinessResult: ReadinessResult (optional)
+    └── completedTasks: string[] (optional)
+```
+
+### Firebase Security Rules
+
+To secure your Firestore database, add these rules in the Firebase Console:
+
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can only read/write their own data
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
+```
+
+### Authentication Features
+
+- Email/password authentication
+- Password reset functionality
+- Protected routes (dashboard pages require login)
+- Automatic user profile creation on signup
+- User session persistence
+
 ## Project Structure
 
 ```
 src/
 ├── app/                    # Next.js App Router pages
-│   ├── (public)/          # Public pages (landing, about)
-│   ├── (seller)/          # Seller-focused pages
+│   ├── (public)/          # Public pages (landing, about, login, signup)
+│   ├── (seller)/          # Seller-focused pages (protected)
 │   └── api/               # API routes
 ├── components/            # React components
 │   ├── ui/               # shadcn/ui components
+│   ├── ProtectedRoute.tsx # Auth wrapper for protected pages
 │   └── ...               # Custom components
+├── contexts/              # React contexts
+│   └── AuthContext.tsx   # Authentication context provider
 ├── data/                 # Mock data
 ├── lib/                  # Utility functions
+│   ├── firebase.ts       # Firebase initialization
+│   ├── auth.ts           # Authentication helpers
+│   └── firestore.ts      # Firestore database helpers
 └── types/                # TypeScript type definitions
 ```
 
@@ -74,9 +134,11 @@ src/
 
 - `/` - Landing page with CTA
 - `/about` - Company information
-- `/seller` - Seller onboarding
-- `/seller/dashboard` - Accelerator dashboard
-- `/seller/ready` - Sellable score & publish
+- `/login` - User login page
+- `/signup` - User registration page
+- `/seller` - Seller onboarding (protected)
+- `/seller/dashboard` - Accelerator dashboard (protected)
+- `/seller/ready` - Sellable score & publish (protected)
 - `/buyer` - Marketplace for buyers
 
 ## API Routes

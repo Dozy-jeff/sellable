@@ -10,27 +10,55 @@ import Checklist from '@/components/Checklist';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ReadinessResult } from '@/types';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import { useAuth } from '@/contexts/AuthContext';
+import { getReadinessResult, getCompletedTasks } from '@/lib/firestore';
 
-export default function SellerDashboardPage() {
+function SellerDashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user, userProfile } = useAuth();
   const [readinessResult, setReadinessResult] = useState<ReadinessResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [completedTasks, setCompletedTasks] = useState<string[]>([]);
 
   useEffect(() => {
-    // Get readiness result from sessionStorage
-    const stored = sessionStorage.getItem('readinessResult');
-    if (stored) {
-      setReadinessResult(JSON.parse(stored));
-    }
-    
-    // Get completed tasks
-    const completed = JSON.parse(localStorage.getItem('sellable:completed-tasks') || '[]');
-    setCompletedTasks(completed);
-    
-    setIsLoading(false);
-  }, []);
+    const loadData = async () => {
+      if (!user) return;
+
+      try {
+        // Get readiness result from Firestore
+        const firestoreReadiness = await getReadinessResult(user.uid);
+
+        // Fallback to sessionStorage for migration
+        if (!firestoreReadiness) {
+          const stored = sessionStorage.getItem('readinessResult');
+          if (stored) {
+            setReadinessResult(JSON.parse(stored));
+          }
+        } else {
+          setReadinessResult(firestoreReadiness);
+        }
+
+        // Get completed tasks from Firestore
+        const firestoreTasks = await getCompletedTasks(user.uid);
+
+        // Fallback to localStorage for migration
+        if (firestoreTasks.length === 0) {
+          const completed = JSON.parse(localStorage.getItem('sellable:completed-tasks') || '[]');
+          setCompletedTasks(completed);
+        } else {
+          setCompletedTasks(firestoreTasks);
+        }
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, [user]);
 
   const handleChecklistComplete = () => {
     router.push('/seller/ready');
@@ -62,11 +90,11 @@ export default function SellerDashboardPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <PageHeader 
-        title="Your Accelerator Dashboard" 
+      <PageHeader
+        title="Your Accelerator Dashboard"
         description="Increase your score by completing tasks and following your personalized plan."
       />
-      
+
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -78,7 +106,7 @@ export default function SellerDashboardPage() {
                   <CardTitle>Your Sellable Score</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ReadinessWidget 
+                  <ReadinessWidget
                     score={readinessResult.readiness}
                     revenue={500000} // Mock data
                     ebitda={100000} // Mock data
@@ -111,7 +139,7 @@ export default function SellerDashboardPage() {
                   <CardTitle>Your Checklist</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Checklist 
+                  <Checklist
                     items={readinessResult.checklist}
                     onComplete={handleChecklistComplete}
                     completedItems={completedTasks}
@@ -146,8 +174,8 @@ export default function SellerDashboardPage() {
                       <span>{completedTasks.length} / {readinessResult.checklist.length}</span>
                     </div>
                     <div className="w-full bg-muted rounded-full h-2">
-                      <div 
-                        className="bg-primary h-2 rounded-full transition-all duration-300" 
+                      <div
+                        className="bg-primary h-2 rounded-full transition-all duration-300"
                         style={{ width: `${(completedTasks.length / readinessResult.checklist.length) * 100}%` }}
                       ></div>
                     </div>
@@ -162,5 +190,13 @@ export default function SellerDashboardPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SellerDashboardPage() {
+  return (
+    <ProtectedRoute>
+      <SellerDashboardContent />
+    </ProtectedRoute>
   );
 }

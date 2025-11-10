@@ -14,6 +14,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
 import { processVideos, sellableVideos } from '@/data/videos';
 import { SellerIntake } from '@/types';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import { useAuth } from '@/contexts/AuthContext';
+import { saveSellerIntake, saveReadinessResult } from '@/lib/firestore';
 
 const sellerIntakeSchema = z.object({
   companyName: z.string().min(1, 'Company name is required'),
@@ -32,8 +35,9 @@ const sellerIntakeSchema = z.object({
   customerConcentration: z.enum(['low', 'med', 'high']).optional()
 });
 
-export default function SellerOnboardingPage() {
+function SellerOnboardingContent() {
   const router = useRouter();
+  const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedSystems, setSelectedSystems] = useState<string[]>([]);
   const [selectedBlockers, setSelectedBlockers] = useState<string[]>([]);
@@ -51,12 +55,27 @@ export default function SellerOnboardingPage() {
   const blockers = ['messy financials', 'no SOPs', 'customer concentration', 'no systems', 'tax issues', 'legal issues'];
 
   const onSubmit = async (data: SellerIntake) => {
-    console.log('Form data:', data); // Debug log
+    if (!user) {
+      alert('You must be logged in to submit this form.');
+      return;
+    }
+
+    console.log('Form data:', data);
     console.log('Selected systems:', selectedSystems);
     console.log('Selected blockers:', selectedBlockers);
-    
+
     setIsSubmitting(true);
     try {
+      // Merge selected systems and blockers into the data
+      const completeData = {
+        ...data,
+        systems: selectedSystems,
+        blockers: selectedBlockers
+      };
+
+      // Save seller intake to Firestore
+      await saveSellerIntake(user.uid, completeData);
+
       // Create mock result for testing
       const mockResult = {
         readiness: 67,
@@ -72,32 +91,32 @@ export default function SellerOnboardingPage() {
           'Create SOP for order fulfillment'
         ]
       };
-      
-      // Store result in sessionStorage for dashboard
+
+      // Save readiness result to Firestore
+      await saveReadinessResult(user.uid, mockResult);
+
+      // Store result in sessionStorage for immediate use (optional fallback)
       sessionStorage.setItem('readinessResult', JSON.stringify(mockResult));
-      
+
       // Redirect to dashboard
       router.push(`/seller/dashboard?score=${mockResult.readiness}`);
-      
+
       // Uncomment below to use real API
       /*
       const response = await fetch('/api/intake/seller', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          ...data, 
-          systems: selectedSystems, 
-          blockers: selectedBlockers 
-        })
+        body: JSON.stringify(completeData)
       });
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const result = await response.json();
       console.log('API response:', result);
-      
+
+      await saveReadinessResult(user.uid, result);
       sessionStorage.setItem('readinessResult', JSON.stringify(result));
       router.push(`/seller/dashboard?score=${result.readiness}`);
       */
@@ -346,5 +365,13 @@ export default function SellerOnboardingPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SellerOnboardingPage() {
+  return (
+    <ProtectedRoute>
+      <SellerOnboardingContent />
+    </ProtectedRoute>
   );
 }
