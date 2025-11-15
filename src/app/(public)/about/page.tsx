@@ -2,6 +2,7 @@ import Shell from '@/components/Shell';
 import PageHeader from '@/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, Target, TrendingUp } from 'lucide-react';
+import { processVideos, sellableVideos } from '@/data/videos';
 
 export default function AboutPage() {
   return (
@@ -13,6 +14,7 @@ export default function AboutPage() {
       
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto space-y-16">
+          
           {/* Problem Section */}
           <section>
             <h2 className="text-3xl font-bold mb-6">The Problem</h2>

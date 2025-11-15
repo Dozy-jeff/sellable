@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Shell from '@/components/Shell';
 import PageHeader from '@/components/PageHeader';
 import ListingCard from '@/components/ListingCard';
 import ListingFilters from '@/components/ListingFilters';
@@ -134,60 +135,64 @@ export default function BuyerMarketplacePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <PageHeader 
-        title="Buyer Marketplace" 
-        description="Discover businesses ready for acquisition. All listings are pre-vetted and prepared for sale."
-        actions={
-          <div className="text-sm text-muted-foreground">
-            {filteredListings.length} businesses available
-          </div>
-        }
-      />
-      
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            {/* Filters Sidebar */}
-            <div className="lg:col-span-1">
-              <div className="sticky top-8">
-                <ListingFilters onFiltersChange={handleFiltersChange} />
-              </div>
+    <Shell>
+      <div className="min-h-screen bg-background">
+        <PageHeader
+          title="Buyer Marketplace"
+          description="Discover businesses ready for acquisition. All listings are pre-vetted and prepared for sale."
+          actions={
+            <div className="text-sm text-muted-foreground">
+              {filteredListings.length} businesses available
             </div>
+          }
+        />
 
-            {/* Listings Grid */}
-            <div className="lg:col-span-3">
-              {filteredListings.length === 0 ? (
-                <EmptyState
-                  title="No businesses found"
-                  description="Try adjusting your filters to see more results."
-                  actionLabel="Clear Filters"
-                  onAction={() => handleFiltersChange({
-                    search: '',
-                    industry: '',
-                    model: '',
-                    minRevenue: '',
-                    maxRevenue: '',
-                    minEbitda: '',
-                    maxEbitda: '',
-                    minReadiness: ''
-                  })}
-                />
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {filteredListings.map((listing, index) => (
-                    <ListingCard 
-                      key={listing.id} 
-                      listing={listing} 
-                      isUserCompany={index === 0 && listing.id.startsWith('user-company')}
-                    />
-                  ))}
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+              {/* Filters Sidebar */}
+              <div className="lg:col-span-1">
+                <div className="sticky top-8">
+                  <ListingFilters onFiltersChange={handleFiltersChange} />
                 </div>
-              )}
+              </div>
+
+              {/* Listings Grid */}
+              <div className="lg:col-span-3">
+                {filteredListings.length === 0 ? (
+                  <EmptyState
+                    title="No businesses found"
+                    description="Try adjusting your filters to see more results."
+                    actionLabel="Clear Filters"
+                    onAction={() =>
+                      handleFiltersChange({
+                        search: '',
+                        industry: '',
+                        model: '',
+                        minRevenue: '',
+                        maxRevenue: '',
+                        minEbitda: '',
+                        maxEbitda: '',
+                        minReadiness: '',
+                      })
+                    }
+                  />
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {filteredListings.map((listing, index) => (
+                      <ListingCard
+                        key={listing.id}
+                        listing={listing}
+                        isUserCompany={index === 0 && listing.id.startsWith('user-company')}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </Shell>
   );
 }

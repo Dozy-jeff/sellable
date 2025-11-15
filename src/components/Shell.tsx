@@ -65,17 +65,12 @@ export default function Shell({ children }: ShellProps) {
                       </div>
                     </>
                   ) : (
-                    <>
-                      <Link href="/login" className="text-sm hover:text-primary">
-                        Login
-                      </Link>
-                      <Link
-                        href="/signup"
-                        className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm hover:bg-primary/90"
-                      >
-                        Get Started
-                      </Link>
-                    </>
+                    <Link
+                      href="/signup"
+                      className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm hover:bg-primary/90"
+                    >
+                      Get Started
+                    </Link>
                   )}
                 </>
               )}
