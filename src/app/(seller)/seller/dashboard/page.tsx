@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ReadinessResult } from '@/types';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import DashboardLayout from '@/components/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { getReadinessResult, getCompletedTasks, getStepProgress, saveStepProgress, saveReadinessResult, getSellerIntake } from '@/lib/firestore';
 import { calculateStepFromScore } from '@/data/processSteps';
@@ -303,7 +304,9 @@ function SellerDashboardContent() {
 export default function SellerDashboardPage() {
   return (
     <ProtectedRoute>
-      <SellerDashboardContent />
+      <DashboardLayout>
+        <SellerDashboardContent />
+      </DashboardLayout>
     </ProtectedRoute>
   );
 }

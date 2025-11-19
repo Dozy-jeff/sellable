@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Listing, Industry, BusinessModel } from '@/types';
 import { formatMoney } from '@/lib/format';
 import { Heart, Mail, MapPin, Users, TrendingUp, DollarSign, Building2, Calendar, Check, Star } from 'lucide-react';
+import DashboardLayout from '@/components/DashboardLayout';
 
 interface FilterState {
   search: string;
@@ -192,27 +193,30 @@ export default function BuyerMarketplacePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
+      <DashboardLayout>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <PageHeader 
-        title="Buyer Marketplace" 
-        description="Discover businesses ready for acquisition. All listings are pre-vetted and prepared for sale."
-        actions={
-          <div className="text-sm text-muted-foreground">
-            {filteredListings.length} businesses available
-          </div>
-        }
-      />
-      
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+    <DashboardLayout>
+      <div className="min-h-screen bg-background">
+        <PageHeader
+          title="Buyer Marketplace"
+          description="Discover businesses ready for acquisition. All listings are pre-vetted and prepared for sale."
+          actions={
+            <div className="text-sm text-muted-foreground">
+              {filteredListings.length} businesses available
+            </div>
+          }
+        />
+
+          <div className="container mx-auto px-4 py-8">
+            <div className="max-w-7xl mx-auto">
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             {/* Filters Sidebar */}
             <div className="lg:col-span-1">
               <div className="sticky top-8">
@@ -482,6 +486,7 @@ export default function BuyerMarketplacePage() {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }
