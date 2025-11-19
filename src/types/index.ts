@@ -29,6 +29,7 @@ export interface SellerIntake {
   model: BusinessModel;
   revenue: number;            // annual, USD
   ebitda?: number;
+  debt?: number;              // total debt, USD
   employees: number;
   yearsOperating: number;
   systems: string[];
@@ -36,6 +37,35 @@ export interface SellerIntake {
   blockers: string[];         // e.g., ['messy financials','no SOPs']
   hasSOPs?: boolean;
   customerConcentration?: 'low'|'med'|'high';
+}
+
+export interface Article {
+  id: string;
+  title: string;
+  description: string;
+  content: string;
+  readTime: string;
+  stepId: string;
+}
+
+export interface ProcessStep {
+  id: string;
+  title: string;
+  description: string;
+  articles: Article[];
+  tasks: StepTask[];
+}
+
+export interface StepTask {
+  id: string;
+  title: string;
+  description: string;
+}
+
+export interface StepProgress {
+  completedArticles: string[];
+  completedTasks: string[];
+  currentStep: number;
 }
 
 export interface ReadinessResult {

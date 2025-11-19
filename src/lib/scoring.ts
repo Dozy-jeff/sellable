@@ -8,6 +8,13 @@ export function scoreFromIntake(x: SellerIntake): number {
   if (x.systems?.length) score += 10;
   if (x.hasSOPs) score += 10;
   if (x.customerConcentration === 'high') score -= 10;
+
+  // Debt scoring
+  const debtToRevenue = (x.debt ?? 0) / (x.revenue || 1);
+  if (debtToRevenue > 0.5) score -= 10;
+  else if (debtToRevenue > 0.3) score -= 5;
+  else if (debtToRevenue === 0 || !x.debt) score += 5;
+
   return Math.min(95, Math.max(10, score));
 }
 

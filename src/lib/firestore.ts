@@ -131,3 +131,39 @@ export const getCompletedTasks = async (uid: string): Promise<string[]> => {
   const userProfile = await getUserProfile(uid);
   return userProfile?.completedTasks || [];
 };
+
+// Save completed articles
+export const saveCompletedArticles = async (
+  uid: string,
+  completedArticles: string[]
+): Promise<void> => {
+  const userRef = doc(db, 'users', uid);
+  await updateDoc(userRef, {
+    completedArticles,
+    updatedAt: serverTimestamp(),
+  });
+};
+
+// Get completed articles
+export const getCompletedArticles = async (uid: string): Promise<string[]> => {
+  const userProfile = await getUserProfile(uid);
+  return (userProfile as any)?.completedArticles || [];
+};
+
+// Save step progress
+export const saveStepProgress = async (
+  uid: string,
+  stepProgress: { currentStep: number; completedArticles: string[]; completedTasks: string[] }
+): Promise<void> => {
+  const userRef = doc(db, 'users', uid);
+  await updateDoc(userRef, {
+    stepProgress,
+    updatedAt: serverTimestamp(),
+  });
+};
+
+// Get step progress
+export const getStepProgress = async (uid: string): Promise<{ currentStep: number; completedArticles: string[]; completedTasks: string[] } | null> => {
+  const userProfile = await getUserProfile(uid);
+  return (userProfile as any)?.stepProgress || null;
+};

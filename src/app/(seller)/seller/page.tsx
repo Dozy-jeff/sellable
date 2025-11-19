@@ -17,6 +17,7 @@ import { SellerIntake } from '@/types';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
 import { saveSellerIntake, saveReadinessResult } from '@/lib/firestore';
+import { scoreFromIntake, checklistForScore, getNextSteps } from '@/lib/scoring';
 
 const sellerIntakeSchema = z.object({
   companyName: z.string().min(1, 'Company name is required'),
@@ -26,6 +27,7 @@ const sellerIntakeSchema = z.object({
   model: z.enum(['Local Services', 'Shopify/DTC', 'Marketplace', 'SaaS', 'Agency', 'Franchise']),
   revenue: z.number().min(0, 'Revenue must be positive'),
   ebitda: z.number().optional(),
+  debt: z.number().min(0, 'Debt must be non-negative').optional(),
   employees: z.number().min(0, 'Employee count must be non-negative'),
   yearsOperating: z.number().min(0, 'Years operating must be non-negative'),
   systems: z.array(z.string()).optional(),
@@ -76,30 +78,25 @@ function SellerOnboardingContent() {
       // Save seller intake to Firestore
       await saveSellerIntake(user.uid, completeData);
 
-      // Create mock result for testing
-      const mockResult = {
-        readiness: 67,
-        checklist: [
-          'Upload clean P&L (TTM + 3Y)',
-          'Provide customer concentration analysis',
-          'Create/update SOPs for core ops',
-          'Tax returns (last 2 years)',
-          'Employee roster + roles'
-        ],
-        nextSteps: [
-          'Connect QuickBooks and categorize transactions',
-          'Create SOP for order fulfillment'
-        ]
+      // Calculate real score based on intake data
+      const score = scoreFromIntake(completeData);
+      const checklist = checklistForScore(score);
+      const nextSteps = getNextSteps(completeData.blockers || []);
+
+      const result = {
+        readiness: score,
+        checklist,
+        nextSteps
       };
 
       // Save readiness result to Firestore
-      await saveReadinessResult(user.uid, mockResult);
+      await saveReadinessResult(user.uid, result);
 
       // Store result in sessionStorage for immediate use (optional fallback)
-      sessionStorage.setItem('readinessResult', JSON.stringify(mockResult));
+      sessionStorage.setItem('readinessResult', JSON.stringify(result));
 
       // Redirect to dashboard
-      router.push(`/seller/dashboard?score=${mockResult.readiness}`);
+      router.push(`/seller/dashboard?score=${result.readiness}`);
 
       // Uncomment below to use real API
       /*
@@ -206,32 +203,43 @@ function SellerOnboardingContent() {
                       )}
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="text-sm font-medium mb-2 block">Annual Revenue *</label>
-                        <Input 
-                          type="number" 
-                          {...register('revenue', { valueAsNumber: true })} 
-                          placeholder="500000" 
+                        <Input
+                          type="number"
+                          {...register('revenue', { valueAsNumber: true })}
+                          placeholder="500000"
                         />
                         {errors.revenue && (
                           <p className="text-sm text-red-600 mt-1">{errors.revenue.message}</p>
                         )}
                       </div>
                       <div>
-                        <label className="text-sm font-medium mb-2 block">EBITDA</label>
-                        <Input 
-                          type="number" 
-                          {...register('ebitda', { valueAsNumber: true })} 
-                          placeholder="100000" 
+                        <label className="text-sm font-medium mb-2 block">Annual Profit (EBITDA)</label>
+                        <Input
+                          type="number"
+                          {...register('ebitda', { valueAsNumber: true })}
+                          placeholder="100000"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">Total Debt</label>
+                        <Input
+                          type="number"
+                          {...register('debt', { valueAsNumber: true })}
+                          placeholder="50000"
                         />
                       </div>
                       <div>
                         <label className="text-sm font-medium mb-2 block">Employees *</label>
-                        <Input 
-                          type="number" 
-                          {...register('employees', { valueAsNumber: true })} 
-                          placeholder="5" 
+                        <Input
+                          type="number"
+                          {...register('employees', { valueAsNumber: true })}
+                          placeholder="5"
                         />
                         {errors.employees && (
                           <p className="text-sm text-red-600 mt-1">{errors.employees.message}</p>
