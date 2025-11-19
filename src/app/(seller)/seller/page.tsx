@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import PageHeader from '@/components/PageHeader';
+import Shell from '@/components/Shell';
 import RoleVideos from '@/components/RoleVideos';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,7 +15,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
 import { processVideos, sellableVideos } from '@/data/videos';
 import { SellerIntake } from '@/types';
-import ProtectedRoute from '@/components/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
 import { saveSellerIntake, saveReadinessResult } from '@/lib/firestore';
 import { scoreFromIntake, checklistForScore, getNextSteps } from '@/lib/scoring';
@@ -352,7 +352,6 @@ function SellerOnboardingContent() {
             {/* Right Sidebar */}
             <div className="space-y-6">
               <RoleVideos videos={processVideos} title="Process Academy" />
-              <RoleVideos videos={sellableVideos} title="About Sellable" />
               
               <Card>
                 <CardHeader>
@@ -378,8 +377,8 @@ function SellerOnboardingContent() {
 
 export default function SellerOnboardingPage() {
   return (
-    <ProtectedRoute>
+    <Shell>
       <SellerOnboardingContent />
-    </ProtectedRoute>
+    </Shell>
   );
 }
