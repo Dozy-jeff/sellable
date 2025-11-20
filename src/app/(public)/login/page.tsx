@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowLeft } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -53,13 +54,30 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-          <CardDescription>Sign in to your Sellable account</CardDescription>
-        </CardHeader>
-        <CardContent>
+    <div className="min-h-screen bg-background p-4">
+      <div className="max-w-md mx-auto flex flex-col h-full">
+        <div className="flex items-center gap-3 mb-8">
+          <Link href="/" className="text-2xl font-bold text-primary">
+            Sellable
+          </Link>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="gap-2 text-sm"
+            onClick={() => router.back()}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <Card className="w-full">
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
+              <CardDescription>Sign in to your Sellable account</CardDescription>
+            </CardHeader>
+            <CardContent>
           {!showResetPassword ? (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
@@ -163,16 +181,18 @@ export default function LoginPage() {
               )}
             </div>
           )}
-        </CardContent>
-        <CardFooter className="flex justify-center">
-          <p className="text-sm text-muted-foreground">
-            Don't have an account?{' '}
-            <Link href="/signup" className="text-primary hover:underline">
-              Sign up
-            </Link>
-          </p>
-        </CardFooter>
-      </Card>
+            </CardContent>
+            <CardFooter className="flex justify-center">
+              <p className="text-sm text-muted-foreground">
+                Don't have an account?{' '}
+                <Link href="/signup" className="text-primary hover:underline">
+                  Sign up
+                </Link>
+              </p>
+            </CardFooter>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

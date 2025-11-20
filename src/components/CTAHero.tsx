@@ -90,7 +90,7 @@ export default function CTAHero() {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button asChild size="lg" className="text-lg px-8 py-6">
-            <Link href="/seller">Seller Accelerator</Link>
+            <Link href="/signup">Seller Accelerator</Link>
           </Button>
           <Button
             asChild
@@ -98,7 +98,7 @@ export default function CTAHero() {
             size="lg"
             className="text-lg px-8 py-6"
           >
-            <Link href="/buyer">Buyer Marketplace</Link>
+            <Link href="/signup">Buyer Marketplace</Link>
           </Button>
         </div>
       </div>

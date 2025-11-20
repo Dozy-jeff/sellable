@@ -35,12 +35,6 @@ export default function Shell({ children }: ShellProps) {
               Sellable
             </Link>
             <nav className="hidden md:flex items-center space-x-6">
-              <Link href="/seller" className="text-sm hover:text-primary">
-                Seller Accelerator
-              </Link>
-              <Link href="/buyer" className="text-sm hover:text-primary">
-                Buyer Marketplace
-              </Link>
               <Link href="/about" className="text-sm hover:text-primary">
                 About
               </Link>

@@ -66,6 +66,7 @@ export interface StepProgress {
   completedArticles: string[];
   completedTasks: string[];
   currentStep: number;
+  overallProgress?: number;
 }
 
 export interface ReadinessResult {

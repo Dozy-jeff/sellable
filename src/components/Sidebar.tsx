@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { logOut } from '@/lib/auth';
-import { updateUserProfile } from '@/lib/firestore';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import {
@@ -17,8 +16,7 @@ import {
   User,
   Building2,
   ChevronLeft,
-  ChevronRight,
-  Home
+  ChevronRight
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -33,8 +31,8 @@ export default function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
 
-  const isSeller = userProfile?.role === 'seller' || pathname?.includes('/seller');
-  const isBuyer = userProfile?.role === 'buyer' || pathname?.includes('/buyer');
+  const isSeller = userProfile?.role === 'seller';
+  const isBuyer = userProfile?.role === 'buyer';
 
   const handleLogout = async () => {
     try {
@@ -42,21 +40,6 @@ export default function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
       router.push('/');
     } catch (error) {
       console.error('Logout failed:', error);
-    }
-  };
-
-  const handleRoleSwitch = async (role: 'seller' | 'buyer') => {
-    if (!user) return;
-
-    try {
-      await updateUserProfile(user.uid, { role });
-      if (role === 'seller') {
-        router.push('/seller/dashboard');
-      } else {
-        router.push('/buyer');
-      }
-    } catch (error) {
-      console.error('Error switching role:', error);
     }
   };
 
@@ -71,31 +54,23 @@ export default function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
   };
 
   const navItems = [
-    {
-      label: 'Home',
-      icon: Home,
-      href: '/',
-      active: pathname === '/'
-    },
-    {
+    ...(isSeller ? [{
       label: 'Dashboard',
       icon: LayoutDashboard,
       href: '/seller/dashboard',
-      active: pathname === '/seller/dashboard',
-      show: isSeller || !isBuyer
-    },
-    {
+      active: pathname === '/seller/dashboard'
+    }] : []),
+    ...(isBuyer ? [{
       label: 'Marketplace',
       icon: ShoppingBag,
       href: '/buyer',
-      active: pathname === '/buyer',
-      show: true
-    }
+      active: pathname === '/buyer'
+    }] : [])
   ];
 
   return (
     <>
-      <div className={`h-screen bg-background border-r flex flex-col transition-all duration-300 ${
+      <div className={`h-screen sticky top-0 bg-background border-r flex flex-col transition-all duration-300 ${
         collapsed ? 'w-16' : 'w-64'
       }`}>
         {/* Header */}
@@ -138,7 +113,7 @@ export default function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
 
         {/* Navigation */}
         <nav className="flex-1 p-2 space-y-1">
-          {navItems.filter(item => item.show !== false).map((item) => (
+          {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -153,38 +128,6 @@ export default function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
             </Link>
           ))}
         </nav>
-
-        {/* Role Switch */}
-        {user && (
-          <div className="p-2 border-t">
-            <div className={`${collapsed ? 'space-y-1' : 'grid grid-cols-2 gap-1'}`}>
-              <button
-                onClick={() => handleRoleSwitch('seller')}
-                className={`flex items-center justify-center gap-2 px-3 py-2 rounded-md text-xs transition-colors ${
-                  isSeller && !isBuyer
-                    ? 'bg-primary/10 text-primary'
-                    : 'hover:bg-muted'
-                }`}
-                title="Switch to Seller"
-              >
-                <Building2 className="h-3.5 w-3.5" />
-                {!collapsed && <span>Seller</span>}
-              </button>
-              <button
-                onClick={() => handleRoleSwitch('buyer')}
-                className={`flex items-center justify-center gap-2 px-3 py-2 rounded-md text-xs transition-colors ${
-                  isBuyer
-                    ? 'bg-primary/10 text-primary'
-                    : 'hover:bg-muted'
-                }`}
-                title="Switch to Buyer"
-              >
-                <ShoppingBag className="h-3.5 w-3.5" />
-                {!collapsed && <span>Buyer</span>}
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Bottom Actions */}
         <div className="p-2 border-t space-y-1">
@@ -230,86 +173,58 @@ export default function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
               </div>
             )}
 
-            {/* Reset Assessment */}
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium">Reset Assessment</h3>
-              <p className="text-xs text-muted-foreground">
-                Start fresh with new business information. This will clear your current progress and score.
-              </p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsResetConfirmOpen(true)}
-                className="w-full"
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Reset & Start Over
-              </Button>
-            </div>
+            {isSeller && (
+              <>
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">Reset Assessment</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Start fresh with new business information. This will clear your current progress and score.
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsResetConfirmOpen(true)}
+                    className="w-full"
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Reset & Start Over
+                  </Button>
+                </div>
 
-            {/* Edit Profile */}
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium">Update Business Info</h3>
-              <p className="text-xs text-muted-foreground">
-                Re-enter your business details to get an updated sellable score.
-              </p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  router.push('/seller');
-                  setIsSettingsOpen(false);
-                }}
-                className="w-full"
-              >
-                <Building2 className="h-4 w-4 mr-2" />
-                Update Business Details
-              </Button>
-            </div>
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">Update Business Info</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Re-enter your business details to get an updated sellable score.
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      router.push('/seller/dashboard?onboarding=1');
+                      setIsSettingsOpen(false);
+                    }}
+                    className="w-full"
+                  >
+                    <Building2 className="h-4 w-4 mr-2" />
+                    Update Business Details
+                  </Button>
+                </div>
+              </>
+            )}
 
-            {/* Switch Role */}
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium">Switch Role</h3>
-              <p className="text-xs text-muted-foreground">
-                Change between seller and buyer views.
-              </p>
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  variant={isSeller && !isBuyer ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => {
-                    handleRoleSwitch('seller');
-                    setIsSettingsOpen(false);
-                  }}
-                >
-                  <Building2 className="h-4 w-4 mr-2" />
-                  Seller
-                </Button>
-                <Button
-                  variant={isBuyer ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => {
-                    handleRoleSwitch('buyer');
-                    setIsSettingsOpen(false);
-                  }}
-                >
-                  <ShoppingBag className="h-4 w-4 mr-2" />
-                  Buyer
-                </Button>
-              </div>
-            </div>
           </div>
         </DialogContent>
       </Dialog>
 
       {/* Reset Confirmation Dialog */}
-      <Dialog open={isResetConfirmOpen} onOpenChange={setIsResetConfirmOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Reset Assessment?</DialogTitle>
-            <DialogDescription>
-              This will clear all your progress, including:
-            </DialogDescription>
+      {isSeller && (
+        <Dialog open={isResetConfirmOpen} onOpenChange={setIsResetConfirmOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Reset Assessment?</DialogTitle>
+              <DialogDescription>
+                This will clear all your progress, including:
+              </DialogDescription>
           </DialogHeader>
 
           <ul className="text-sm space-y-1 py-2">
@@ -338,8 +253,9 @@ export default function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
               Reset Everything
             </Button>
           </div>
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 }

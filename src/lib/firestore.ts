@@ -11,7 +11,7 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { db } from './firebase';
-import { ReadinessResult, SellerIntake } from '@/types';
+import { ReadinessResult, SellerIntake, StepProgress } from '@/types';
 
 // User profile interface
 export interface UserProfile {
@@ -153,7 +153,7 @@ export const getCompletedArticles = async (uid: string): Promise<string[]> => {
 // Save step progress
 export const saveStepProgress = async (
   uid: string,
-  stepProgress: { currentStep: number; completedArticles: string[]; completedTasks: string[] }
+  stepProgress: StepProgress
 ): Promise<void> => {
   const userRef = doc(db, 'users', uid);
   await updateDoc(userRef, {
@@ -163,7 +163,7 @@ export const saveStepProgress = async (
 };
 
 // Get step progress
-export const getStepProgress = async (uid: string): Promise<{ currentStep: number; completedArticles: string[]; completedTasks: string[] } | null> => {
+export const getStepProgress = async (uid: string): Promise<StepProgress | null> => {
   const userProfile = await getUserProfile(uid);
   return (userProfile as any)?.stepProgress || null;
 };
