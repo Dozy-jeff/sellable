@@ -1,6 +1,6 @@
 # Sellable - Business Sale Accelerator
 
-An AI-powered platform that helps business owners prepare, optimize, and sell their companies with confidence.
+An AI-powered platform that helps business owners prepare and sell their companies with confidence.
 
 ## Features
 
