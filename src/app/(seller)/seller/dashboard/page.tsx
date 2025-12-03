@@ -8,7 +8,7 @@ import StepTracker from '@/components/StepTracker';
 import Checklist from '@/components/Checklist';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import RoleVideos from '@/components/RoleVideos';
+import ProcessArticles from '@/components/ProcessArticles';
 import SellerOnboardingForm from '@/components/SellerOnboardingForm';
 import { ReadinessResult, SellerIntake } from '@/types';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -16,7 +16,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { getReadinessResult, getStepProgress, saveStepProgress, saveReadinessResult, getSellerIntake } from '@/lib/firestore';
 import { processSteps, calculateStepFromScore } from '@/data/processSteps';
-import { processVideos } from '@/data/videos';
+import { processArticles } from '@/data/articles';
 
 function SellerDashboardContent() {
   const router = useRouter();
@@ -217,7 +217,7 @@ function SellerDashboardContent() {
                 </Card>
               </div>
               <div className="space-y-6">
-                <RoleVideos videos={processVideos} title="Process Academy" />
+                <ProcessArticles articles={processArticles} title="Process Academy" />
                 <Card>
                   <CardHeader>
                     <CardTitle>What we'll do for you</CardTitle>
